@@ -35,30 +35,31 @@ jobs:
           fi
 
       # 3) Optimieren (Originale -> images/opt/*-800/1600.{jpg,webp})
-      - name: Build optimized variants
-        if: steps.check.outputs.no_images != 'true'
-        shell: bash
-        run: |
-          shopt -s globstar nullglob
-          for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,heic,HEIC,heif,HEIF}; do
-            # opt-Ordner überspringen
-            case "$f" in images/opt/*) continue;; esac
-            base="${f%.*}"
-            rel="${base#images/}"
-            out_dir="images/opt/$(dirname "$rel")"
-            name="$(basename "$rel")"
-            mkdir -p "$out_dir"
+     - name: Build optimized variants
+  if: steps.check.outputs.no_images != 'true'
+  shell: bash
+  run: |
+    shopt -s globstar nullglob
+    for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,heic,HEIC,heif,HEIF}; do
+      # opt-Ordner überspringen
+      case "$f" in images/opt/*) continue;; esac
 
-            # 800 / 1600 JPG
-            sharp "$f" --rotate --resize 800 --withoutEnlargement --jpeg quality=82 -o "$out_dir/$name-800.jpg"
-            sharp "$f" --rotate --resize 1600 --withoutEnlargement --jpeg quality=82 -o "$out_dir/$name-1600.jpg"
+      rel="${f#images/}"
+      out_dir="images/opt/$(dirname "$rel")"
+      name="$(basename "${rel%.*}")"
+      mkdir -p "$out_dir"
 
-            # 800 / 1600 WEBP
-            sharp "$f" --rotate --resize 800 --withoutEnlargement --webp quality=82 -o "$out_dir/$name-800.webp"
-            sharp "$f" --rotate --resize 1600 --withoutEnlargement --webp quality=82 -o "$out_dir/$name-1600.webp"
+      # JPEG 800/1600
+      sharp -i "$f" -o "$out_dir/$name-800.jpg"  --autoOrient -f jpeg -q 82  resize 800  --withoutEnlargement
+      sharp -i "$f" -o "$out_dir/$name-1600.jpg" --autoOrient -f jpeg -q 82  resize 1600 --withoutEnlargement
 
-            echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
-          done
+      # WEBP 800/1600
+      sharp -i "$f" -o "$out_dir/$name-800.webp"  --autoOrient -f webp -q 82  resize 800  --withoutEnlargement
+      sharp -i "$f" -o "$out_dir/$name-1600.webp" --autoOrient -f webp -q 82  resize 1600 --withoutEnlargement
+
+      echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
+    done
+
 
       # 4) Änderungen committen
       - name: Commit optimized images
