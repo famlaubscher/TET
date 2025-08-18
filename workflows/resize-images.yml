@@ -1,1 +1,31 @@
+name: Optimize gallery images
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "images/**"
+      - ".github/workflows/resize-images.yml"
+      - "scripts/resize.mjs"
+      - "package.json"
+  workflow_dispatch:
 
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm install
+      - name: Resize & compress images (sharp)
+        run: node scripts/resize.mjs
+      - name: Commit optimized images
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "chore(images): optimize gallery assets"
+          file_pattern: |
+            images/opt/**
