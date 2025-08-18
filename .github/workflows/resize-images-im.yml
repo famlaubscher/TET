@@ -1,0 +1,59 @@
+name: Optimize gallery images (IM)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - images/**
+      - .github/workflows/resize-images-im.yml
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y imagemagick webp
+
+      - name: Build optimized variants
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,heic,HEIC,heif,HEIF,webp,WEBP}; do
+            # Skip opt-Ordner & Platzhalter
+            case "$f" in images/opt/*|images/placeholder.jpg) continue;; esac
+            # Skip leere/zu kleine Dateien
+            if [ ! -s "$f" ] || [ "$(stat -c%s "$f")" -lt 1024 ]; then
+              echo "skip tiny/bad $f"
+              continue
+            fi
+            # Nur echte Images weiterverarbeiten
+            mime=$(file --mime-type -b "$f")
+            case "$mime" in image/*) : ;; *) echo "skip non-image $f ($mime)"; continue;; esac
+
+            rel="${f#images/}"
+            out_dir="images/opt/$(dirname "$rel")"
+            name="$(basename "${rel%.*}")"
+            mkdir -p "$out_dir"
+
+            # JPG 800/1600 (kein Upscaling durch >)
+            magick "$f" -auto-orient -strip -resize "800x800>"  -quality 82 "$out_dir/$name-800.jpg"  || { echo "skip $f (jpg800)"; continue; }
+            magick "$f" -auto-orient -strip -resize "1600x1600>" -quality 82 "$out_dir/$name-1600.jpg" || true
+
+            # WebP aus den JPGs
+            cwebp -quiet -q 82 "$out_dir/$name-800.jpg"  -o "$out_dir/$name-800.webp"  || true
+            cwebp -quiet -q 82 "$out_dir/$name-1600.jpg" -o "$out_dir/$name-1600.webp" || true
+
+            echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
+          done
+
+      - name: Commit optimized images
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "chore(images): optimize (IM)"
+          file_pattern: |
+            images/opt/**
