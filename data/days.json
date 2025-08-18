@@ -1,38 +1,14 @@
 {
   "days": [
     {
-      "id": "start-bern",
+      "id": "tag-1",
       "date": "2025-09-06",
-      "title": "Start in Bern",
-      "location": "Bern, Schweiz",
-      "text": "Los geht's! Letzte Checks und ab Richtung Süden.",
-      "tags": [
-        "Asphalt"
-      ],
-      "start_lat": 46.948,
-      "start_lng": 7.447,
-      "end_lat": 46.7,
-      "end_lng": 7.9,
-      "km": 0,
+      "title": "Tag 1 – Testeintrag",
+      "location": "—",
+      "text": "Dieser Eintrag nutzt deinen echten GPX-Track und dein Bild.",
+      "gpx": "stegra_route_tag_1.gpx",
       "photos": [
-        "images/placeholder.jpg"
-      ]
-    },
-    {
-      "id": "piran-abend",
-      "date": "2025-09-08",
-      "title": "Abend in Piran",
-      "location": "Piran, Slowenien",
-      "text": "Sonnenuntergang am Meer – perfekter Ruhetag.",
-      "tags": [
-        "Highlight",
-        "TET"
-      ],
-      "end_lat": 45.528,
-      "end_lng": 13.568,
-      "gpx": "tracks/beispiel.gpx",
-      "photos": [
-        "images/placeholder.jpg"
+        "image1.jpg"
       ]
     }
   ]
