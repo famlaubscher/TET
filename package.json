@@ -1,0 +1,11 @@
+{
+  "name": "gallery-optimizer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "resize": "node scripts/resize.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.33.4"
+  }
+}
