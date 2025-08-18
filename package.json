@@ -1,11 +1,6 @@
 {
-  "name": "tenere-gallery-optimizer",
+  "name": "auto-journal",
   "private": true,
   "type": "module",
-  "scripts": {
-    "resize": "node scripts/resize.mjs"
-  },
-  "dependencies": {
-    "sharp": "^0.33.4"
-  }
+  "dependencies": {}
 }
