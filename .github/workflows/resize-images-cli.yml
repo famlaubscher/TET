@@ -1,0 +1,70 @@
+name: Optimize gallery images (CLI)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - images/**
+      - .github/workflows/resize-images-cli.yml
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Sharp-CLI global installieren (kein Node-Import, daher kein ESM-Ärger)
+      - name: Install sharp-cli
+        run: |
+          npm install -g sharp-cli@^3
+
+      # 2) Falls es keine Bilder gibt: sauber beenden
+      - name: Skip if no images
+        id: check
+        run: |
+          if [ ! -d images ]; then
+            echo "no_images=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          count=$(find images -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.heic' -o -iname '*.heif' \) | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "no_images=true" >> $GITHUB_OUTPUT
+          fi
+
+      # 3) Optimieren (Originale -> images/opt/*-800/1600.{jpg,webp})
+      - name: Build optimized variants
+        if: steps.check.outputs.no_images != 'true'
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,heic,HEIC,heif,HEIF}; do
+            # opt-Ordner überspringen
+            case "$f" in images/opt/*) continue;; esac
+            base="${f%.*}"
+            rel="${base#images/}"
+            out_dir="images/opt/$(dirname "$rel")"
+            name="$(basename "$rel")"
+            mkdir -p "$out_dir"
+
+            # 800 / 1600 JPG
+            sharp "$f" --rotate --resize 800 --withoutEnlargement --jpeg quality=82 -o "$out_dir/$name-800.jpg"
+            sharp "$f" --rotate --resize 1600 --withoutEnlargement --jpeg quality=82 -o "$out_dir/$name-1600.jpg"
+
+            # 800 / 1600 WEBP
+            sharp "$f" --rotate --resize 800 --withoutEnlargement --webp quality=82 -o "$out_dir/$name-800.webp"
+            sharp "$f" --rotate --resize 1600 --withoutEnlargement --webp quality=82 -o "$out_dir/$name-1600.webp"
+
+            echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
+          done
+
+      # 4) Änderungen committen
+      - name: Commit optimized images
+        if: steps.check.outputs.no_images != 'true'
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "chore(images): optimize (CLI)"
+          file_pattern: |
+            images/opt/**
