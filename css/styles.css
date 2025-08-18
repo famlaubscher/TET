@@ -1,17 +1,31 @@
+
 :root{--bg:#0b0c10;--text:#e6e6e6;--muted:#a0a0a0;--card:#15161a;--accent:#4da3ff;--border:#23252b}
 :root.light{--bg:#fff;--text:#101010;--muted:#565c63;--card:#f7f7f8;--accent:#0a84ff;--border:#e5e7eb}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
+
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
 .container{width:min(1000px,92vw);margin:2rem auto}
+
 .site-header,.site-footer{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
 .site-footer{border-top:1px solid var(--border);border-bottom:none;justify-content:center}
 .logo{font-weight:700;color:var(--text);text-decoration:none}
 .nav{display:flex;gap:.75rem}.nav a{color:var(--text);text-decoration:none;padding:.4rem .6rem;border-radius:.5rem}
 .nav a:hover{background:var(--card)}
 #themeToggle{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;cursor:pointer}
+
 .hero{padding:3rem 1.25rem;background:radial-gradient(1200px 400px at 10% -10%,#1a1c22,transparent);border:1px solid var(--border);border-radius:1rem}
+
 .card-list{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
 .card{background:var(--card);border:1px solid var(--border);border-radius:.8rem;overflow:hidden}
 .card img{width:100%;height:160px;object-fit:cover;display:block}
 .meta{color:var(--muted);font-size:.9rem;margin:.25rem 0}
+
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem}
-.map,#map{height:75vh;border:1px solid var(--border);border-radius:.8rem}
+
+.map,#map{height:75vh;border:1px solid var(--border);border-radius:.8rem;position:relative}
+.map-toolbar{display:flex;gap:1rem;margin-bottom:.75rem}
+.map-actions{position:absolute; right:.75rem; top:.75rem; display:flex; flex-direction:column; gap:.5rem; z-index:400}
+.map-actions button{background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:.5rem; padding:.4rem .6rem; cursor:pointer}
+
+.banner{padding:.75rem 1rem; border:1px solid var(--border); border-radius:.6rem; background: #3a1a1a; color:#ffd8d8}
+:root.light .banner{background:#fff0f0; color:#7a1a1a}
