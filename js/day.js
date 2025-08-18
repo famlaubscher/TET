@@ -1,0 +1,8 @@
+(async function(){const id=TravelData.getParam('id');const all=await TravelData.getDays();const d=all.find(x=>x.id===id)||all.sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+if(!d){document.body.innerHTML='<p>Kein Eintrag gefunden.</p>';return;} document.title=d.title+' – Meine Reise'; const $=s=>document.querySelector(s);
+$('#dayTitle').textContent=d.title; $('#dayMeta').textContent=`${TravelData.formatDate(d.date)} · ${(d.location||'')}${d.km?' · '+d.km+' km':''}`; $('#dayText').innerHTML=(d.text||'').split('\n').map(p=>`<p>${p}</p>`).join('');
+const gal=document.getElementById('gallery'); gal.innerHTML=(d.photos||[]).map(u=>`<img src="${u}" alt="${d.title}" loading="lazy">`).join('')||'<p>Noch keine Fotos.</p>';
+const map=L.map('map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);
+const markers=[]; if(typeof d.start_lat==='number'&&typeof d.start_lng==='number') markers.push(L.marker([d.start_lat,d.start_lng]).bindPopup('Start'));
+if(typeof d.end_lat==='number'&&typeof d.end_lng==='number') markers.push(L.marker([d.end_lat,d.end_lng]).bindPopup('Ende')); if(markers.length){const g=L.featureGroup(markers).addTo(map); map.fitBounds(g.getBounds().pad(0.25));} else {map.setView([20,0],2);}
+if(d.gpx){ new L.GPX(d.gpx,{async:true,marker_options:{startIconUrl:null,endIconUrl:null,shadowUrl:null}}).on('loaded',e=>map.fitBounds(e.target.getBounds().pad(0.2))).addTo(map);} })();

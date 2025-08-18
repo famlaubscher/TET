@@ -1,0 +1,3 @@
+(async function(){const data=await TravelData.getDays(); const map=L.map('map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);
+const markers=[],routes=[]; data.forEach(d=>{if(typeof d.end_lat==='number'&&typeof d.end_lng==='number'){markers.push(L.marker([d.end_lat,d.end_lng]).bindPopup(`<strong>${d.title}</strong><br>${d.location||''}<br><a href="day.html?id=${encodeURIComponent(d.id)}">Details</a>`));} if(d.gpx){routes.push(new L.GPX(d.gpx,{async:true,polyline_options:{opacity:.9}}));}});
+const mg=L.featureGroup(markers).addTo(map); const rg=L.featureGroup(routes).addTo(map); if(mg.getLayers().length){map.fitBounds(mg.getBounds().pad(0.2));} else {map.setView([20,0],2);} })();

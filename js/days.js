@@ -1,0 +1,4 @@
+(async function(){const days=await TravelData.getDays();const list=document.getElementById('daysList');const s=document.getElementById('search');const tf=document.getElementById('tagFilter');
+function render(x){list.innerHTML=x.map(TravelData.renderDayCard).join('')||'<p>Noch keine Einträge.</p>'} function apply(){const q=(s?.value||'').toLowerCase();const tag=tf?.value||'';
+const f=days.filter(d=>{const mQ=!q||d.title.toLowerCase().includes(q)||(d.location||'').toLowerCase().includes(q)||(d.text||'').toLowerCase().includes(q);const mT=!tag||(d.tags||[]).includes(tag);return mQ&&mT}).sort((a,b)=>new Date(b.date)-new Date(a.date));render(f)}
+s?.addEventListener('input',apply);tf?.addEventListener('change',apply);render(days);})();
