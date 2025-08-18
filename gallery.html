@@ -3,7 +3,14 @@
 <link rel="stylesheet" href="css/gallery-plus.css"></head>
 <body><header class="site-header"><a class="logo" href="index.html"><img src="icons/tenere-logo.svg" alt=""/>Ténéré Trip</a>
 <nav class="nav"><a href="days.html">Timeline</a><a href="map.html">Karte</a><a href="gallery.html">Galerie</a><a href="about.html">Über</a><button id="themeToggle">🌓</button></nav></header>
-<main class="container"><h1>Galerie</h1><div class="filters"><select id="daySelect"><option value="">Alle Tage</option></select></div><div id="gallery" class="gallery"></div></main>
+<main class="container"><h1>Galerie</h1><div class="filters"><select id="daySelect"><option value="">Alle Tage</option></select></div><div id="gallery" class="gallery"></div>
+<div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
+  <button class="lb-btn prev" aria-label="Vorheriges">‹</button>
+  <img alt="">
+  <button class="lb-btn next" aria-label="Nächstes">›</button>
+  <button class="lb-btn close" aria-label="Schließen">×</button>
+</div>
+</main>
 <footer class="site-footer"><small>© <span id="year"></span></small></footer>
 <script src="js/app.js"></script><script src="js/data.js"></script><script src="js/gallery.js?v=3">></script></body></html>
 
