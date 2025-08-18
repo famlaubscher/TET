@@ -1,11 +1,11 @@
-import { readdir, mkdir, stat, readFile, writeFile } from 'node:fs/promises';
+import { readdir, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
 const srcDir = 'images';
 const outDir = path.join(srcDir, 'opt');
 const exts = new Set(['.jpg', '.jpeg', '.png']);
-const widths = [800, 1600]; // thumbs + large
+const widths = [800, 1600];
 const qualityJpg = 82;
 const qualityWebp = 82;
 
@@ -17,7 +17,7 @@ async function walk(dir) {
   for (const e of entries) {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
-      if (full.startsWith(path.join(srcDir, 'opt'))) continue; // skip outputs
+      if (full.startsWith(path.join(srcDir, 'opt'))) continue;
       files.push(...await walk(full));
     } else {
       const ext = path.extname(e.name).toLowerCase();
@@ -40,28 +40,18 @@ function outPaths(src, w) {
 }
 
 async function processFile(src) {
-  const input = sharp(src, { failOn: 'none' }).rotate(); // auto-rotate by EXIF
-  const meta = await input.metadata();
-  // Skip tiny images
-  if ((meta.width || 0) < 600) return;
-
   for (const w of widths) {
     const { dir, jpg, webp } = outPaths(src, w);
     await ensureDir(dir);
-    // Resize to width, preserve aspect (no hard crop). CSS will crop visually via object-fit.
-    const pipeline = sharp(src).rotate().resize({ width: w, withoutEnlargement: true });
-    await pipeline.clone().jpeg({ quality: qualityJpg, mozjpeg: true }).toFile(jpg);
-    await pipeline.clone().webp({ quality: qualityWebp }).toFile(webp);
-    console.log('✓', path.basename(src), '->', path.relative('.', jpg), 'and', path.relative('.', webp));
+    const p = (await sharp(src, { failOn: 'none' }).rotate()).resize({ width: w, withoutEnlargement: true });
+    await p.clone().jpeg({ quality: qualityJpg, mozjpeg: true }).toFile(jpg);
+    await p.clone().webp({ quality: qualityWebp }).toFile(webp);
+    console.log('✓', src, '->', jpg, 'and', webp);
   }
 }
 
 const files = await walk(srcDir);
-if (files.length === 0) {
-  console.log('No source images found in', srcDir);
-  process.exit(0);
-}
-
+if (files.length === 0) { console.log('No source images in', srcDir); process.exit(0); }
 await ensureDir(outDir);
 for (const f of files) {
   try { await processFile(f); } catch (e) { console.error('Failed:', f, e); }
