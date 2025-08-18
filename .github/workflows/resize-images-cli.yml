@@ -3,7 +3,7 @@ name: Optimize gallery images (CLI)
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - images/**
       - .github/workflows/resize-images-cli.yml
@@ -16,14 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1) Sharp-CLI global installieren (kein Node-Import, daher kein ESM-Ärger)
       - name: Install sharp-cli
-        run: |
-          npm install -g sharp-cli@^3
+        run: npm install -g sharp-cli@5
 
-      # 2) Falls es keine Bilder gibt: sauber beenden
       - name: Skip if no images
         id: check
+        shell: bash
         run: |
           if [ ! -d images ]; then
             echo "no_images=true" >> $GITHUB_OUTPUT
@@ -34,34 +32,31 @@ jobs:
             echo "no_images=true" >> $GITHUB_OUTPUT
           fi
 
-      # 3) Optimieren (Originale -> images/opt/*-800/1600.{jpg,webp})
-     - name: Build optimized variants
-  if: steps.check.outputs.no_images != 'true'
-  shell: bash
-  run: |
-    shopt -s globstar nullglob
-    for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,heic,HEIC,heif,HEIF}; do
-      # opt-Ordner überspringen
-      case "$f" in images/opt/*) continue;; esac
+      - name: Build optimized variants
+        if: steps.check.outputs.no_images != 'true'
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          for f in images/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,heic,HEIC,heif,HEIF}; do
+            # opt-Ordner überspringen
+            case "$f" in images/opt/*) continue;; esac
 
-      rel="${f#images/}"
-      out_dir="images/opt/$(dirname "$rel")"
-      name="$(basename "${rel%.*}")"
-      mkdir -p "$out_dir"
+            rel="${f#images/}"
+            out_dir="images/opt/$(dirname "$rel")"
+            name="$(basename "${rel%.*}")"
+            mkdir -p "$out_dir"
 
-      # JPEG 800/1600
-      sharp -i "$f" -o "$out_dir/$name-800.jpg"  --autoOrient -f jpeg -q 82  resize 800  --withoutEnlargement
-      sharp -i "$f" -o "$out_dir/$name-1600.jpg" --autoOrient -f jpeg -q 82  resize 1600 --withoutEnlargement
+            # JPEG 800/1600
+            sharp -i "$f" -o "$out_dir/$name-800.jpg"  --autoOrient -f jpeg -q 82  resize 800  --withoutEnlargement
+            sharp -i "$f" -o "$out_dir/$name-1600.jpg" --autoOrient -f jpeg -q 82  resize 1600 --withoutEnlargement
 
-      # WEBP 800/1600
-      sharp -i "$f" -o "$out_dir/$name-800.webp"  --autoOrient -f webp -q 82  resize 800  --withoutEnlargement
-      sharp -i "$f" -o "$out_dir/$name-1600.webp" --autoOrient -f webp -q 82  resize 1600 --withoutEnlargement
+            # WEBP 800/1600
+            sharp -i "$f" -o "$out_dir/$name-800.webp"  --autoOrient -f webp -q 82  resize 800  --withoutEnlargement
+            sharp -i "$f" -o "$out_dir/$name-1600.webp" --autoOrient -f webp -q 82  resize 1600 --withoutEnlargement
 
-      echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
-    done
+            echo "✓ $f -> $out_dir/$name-{800,1600}.{jpg,webp}"
+          done
 
-
-      # 4) Änderungen committen
       - name: Commit optimized images
         if: steps.check.outputs.no_images != 'true'
         uses: stefanzweifel/git-auto-commit-action@v6
@@ -69,3 +64,4 @@ jobs:
           commit_message: "chore(images): optimize (CLI)"
           file_pattern: |
             images/opt/**
+
