@@ -6,9 +6,9 @@
       "title": "Tag 1 – Testeintrag",
       "location": "—",
       "text": "Dieser Eintrag nutzt deinen echten GPX-Track und dein Bild.",
-      "gpx": "stegra_route_tag_1.gpx",
+      "gpx": "tracks/stegra_route_tag_1.gpx",
       "photos": [
-        "image1.jpg"
+        "images/image1.jpg"
       ]
     }
   ]
