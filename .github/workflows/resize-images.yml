@@ -21,10 +21,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install deps
-        run: npm install
+
+      # Installiere sharp immer – egal ob package.json vorhanden ist
+      - name: Ensure sharp is available
+        run: |
+          if [ ! -f package.json ]; then echo '{}' > package.json; fi
+          npm pkg set type=module >/dev/null 2>&1 || true
+          npm install sharp@^0.33.4
+
       - name: Resize & compress images (sharp)
         run: node scripts/resize.mjs
+
       - name: Commit optimized images
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
