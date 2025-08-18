@@ -18,23 +18,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Installiere sharp immer – egal ob package.json vorhanden ist
-      - name: Ensure sharp is available
+      # 👉 Sharp garantiert installieren (und in package.json eintragen)
+      - name: Prepare deps (ensure sharp pinned)
         run: |
-          if [ ! -f package.json ]; then echo '{}' > package.json; fi
-          npm pkg set type=module >/dev/null 2>&1 || true
-          npm install sharp@^0.33.4
+          if [ ! -f package.json ]; then
+            echo '{ "name":"tenere-optimizer", "private":true, "type":"module", "dependencies":{} }' > package.json
+          fi
+          npm pkg set dependencies.sharp="^0.33.4"
+          npm install --no-audit --no-fund
 
+      # 👉 Bildverarbeitung (Script ist fehlertolerant – bricht nicht bei leeren Ordnern)
       - name: Resize & compress images (sharp)
-        run: node scripts/resize.mjs
-
-      - name: Commit optimized images
-        uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          commit_message: "chore(images): optimize gallery assets"
-          file_pattern: |
-            images/opt/**
+        run: node
