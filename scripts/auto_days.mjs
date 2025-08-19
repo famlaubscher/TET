@@ -10,7 +10,7 @@ const DAYS_JSON = 'data/days.json';
 const EXCLUDE_DIRS = new Set(['opt', 'opt16x9']);
 const IMAGE_EXTS = new Set(['.jpg','.jpeg','.png','.heic','.heif','.webp','.JPG','.JPEG','.PNG','.HEIC','.HEIF','.WEBP']);
 
-// Europe/Zurich bias for "today" fallback
+// Europe/Zurich date calculation for fallback
 function toISODateLocal(d){
   const tz = 'Europe/Zurich';
   const fmt = new Intl.DateTimeFormat('de-CH', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -79,7 +79,7 @@ async function run(){
   const allImages = await walk(IMAGES_DIR);
   const data = await ensureDaysBase();
 
-  // Build a set of already referenced images
+  // Already referenced
   const used = new Set();
   for (const d of data.days){
     for (const p of (d.photos || [])) used.add(p);
@@ -88,11 +88,10 @@ async function run(){
   // Group new images by date
   const byDate = new Map();
   for (const img of allImages){
-    const rel = img.replace(/\\/g,'/'); // normalize for Windows
-    if (used.has(rel)) continue; // already in days.json
+    const rel = img.replace(/\\/g,'/'); // normalize
+    if (used.has(rel)) continue; // skip already present
     let dt = dateFromPath(rel);
     if (!dt) dt = await gitFileDateISO(rel);
-
     if (!byDate.has(dt)) byDate.set(dt, []);
     byDate.get(dt).push(rel);
   }
@@ -102,13 +101,13 @@ async function run(){
     return;
   }
 
-  // Index days by date (may not be unique ids)
+  // Index days by exact date
   const byDateDay = new Map();
   for (const d of data.days){
     if (d.date) byDateDay.set(d.date, d);
   }
 
-  // Used ids to avoid collision when creating new
+  // Used ids to avoid collision
   const usedIds = new Set(data.days.map(d=>d.id));
 
   for (const [dt, photos] of byDate){

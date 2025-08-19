@@ -13,13 +13,18 @@
     localStorage.setItem('theme', root.classList.contains('light') ? 'light' : 'dark');
   });
 
-  // 👇 Upload-Link EINMAL hinzufügen
-  (function addUploadNav(){
+  // Add "Upload (GitHub)" link to nav for today's date folder
+  (function addGithubUpload(){
+    const repo = { user:'famlaubscher', name:'TET', branch:'main' }; // ggf. anpassen
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    const today = d.toISOString().slice(0,10);
+    const url = `https://github.com/${repo.user}/${repo.name}/upload/${repo.branch}/images/${today}/`;
     const nav = document.querySelector('.nav'); if (!nav) return;
-    if (nav.querySelector('a[href="upload.html"]')) return; // schon vorhanden
-    const a = document.createElement('a');
-    a.href = 'upload.html';
-    a.textContent = 'Upload';
-    nav.appendChild(a);
+    if (!nav.querySelector('a[data-upload]')) {
+      const a = document.createElement('a');
+      a.textContent = 'Upload (GitHub)'; a.href = url; a.target = '_blank'; a.setAttribute('data-upload','1');
+      nav.appendChild(a);
+    }
   })();
 })();
